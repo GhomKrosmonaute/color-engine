@@ -1,0 +1,30 @@
+{
+  "name": "color-engine",
+  "version": "1.0.3",
+  "description": "Creates color gradients from a few colors and converts RBG colors to HEX and vice versa.",
+  "main": "engine.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "jest": {
+    "testRegex": "/test.js$"
+  },
+  "keywords": [
+    "color",
+    "gradient",
+    "hextorgb",
+    "rgbtohex",
+    "hex-to-rgb",
+    "rgb-to-hex",
+    "hex",
+    "rgb",
+    "converter",
+    "generator"
+  ],
+  "author": "ghom",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^24.7.1"
+  },
+  "dependencies": {}
+}
