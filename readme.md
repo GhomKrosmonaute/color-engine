@@ -1,4 +1,4 @@
-# Color Engine *for colored projects*
+# Color Engine _for colored projects_
 
 Color engine for creates color gradients from a few colors and converts RBG colors to HEX and vice versa.
 
@@ -13,14 +13,14 @@ npm install color-engine
 ## How to use ?
 
 ```js
-const Color = require('color-engine')
+const Color = require("color-engine")
 
 const blue = new Color("0000FF")
-const red = new Color([255,0,0])
+const red = new Color([255, 0, 0])
 const NaC = new Color("gneu")
 // NaC : Not a color
 
-blue.fusion(red,.5)
+blue.fusion(red, 0.5)
 //=> Color (purple)
 
 blue.toString()
@@ -31,7 +31,7 @@ blue.isColor
 NaC.isColor
 //=> Boolean (false)
 
-Color.gradient([blue,red],5)
+Color.gradient([blue, red], 5)
 /*=> Array (gradient) [
 	Color (blue),
 	Color (purple-blue),
