@@ -1,13 +1,23 @@
 {
   "name": "color-engine",
-  "version": "1.0.3",
+  "version": "2.0.0",
   "description": "Creates color gradients from a few colors and converts RBG colors to HEX and vice versa.",
-  "main": "engine.js",
+  "main": "dist/index.js",
+  "types": "dist",
   "scripts": {
+    "prettier": "prettier src package.json readme.md tsconfig.json test.js --write",
+    "build": "git rm -r --ignore-unmatch -f ./dist && npm run prettier && tsc",
     "test": "jest"
   },
   "jest": {
     "testRegex": "/test.js$"
+  },
+  "prettier": {
+    "trailingComma": "es5",
+    "tabWidth": 2,
+    "semi": false,
+    "singleQuote": false,
+    "useTabs": false
   },
   "keywords": [
     "color",
@@ -24,7 +34,10 @@
   "author": "ghom",
   "license": "ISC",
   "devDependencies": {
-    "jest": "^24.7.1"
+    "jest": "^24.7.1",
+    "prettier": "^2.0.5",
+    "typescript": "4.0.2",
+    "@types/node": "^14.0.27"
   },
   "dependencies": {}
 }
