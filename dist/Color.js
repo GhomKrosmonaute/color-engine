@@ -21,7 +21,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.rgbRegex = exports.hexRegex = void 0;
 const utils = __importStar(require("./utils"));
-exports.hexRegex = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i;
+exports.hexRegex = /^(?:#|0x)?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i;
 exports.rgbRegex = /^\s*([1-9][0-9.]*)\s*,\s*([1-9][0-9.]*)\s*,\s*([1-9][0-9.]*)\s*$/;
 class Color {
     constructor(resolvable) {
@@ -61,33 +61,77 @@ class Color {
     set alpha(a) {
         this.a = a;
     }
+    /**
+     * get the RGB color as Array
+     */
     get rgb() {
         return [this.r, this.g, this.b];
     }
+    /**
+     * get the hex color as {Color.hexMode}
+     */
     get hex() {
         return Color.rgbToHex(this.rgb);
     }
+    /**
+     * get the hex color as String
+     */
+    get hexString() {
+        return Color.rgbToHexString(this.rgb);
+    }
+    /**
+     * get the hex color as Number
+     */
+    get hexNumber() {
+        return Color.rgbToHexNumber(this.rgb);
+    }
+    /**
+     * get hex code (without prefix) as String
+     */
+    get hexCode() {
+        return Color.rgbToHexCode(this.rgb);
+    }
+    /**
+     * @param resolvable - the fusion color
+     * @param proportion - the ratio of fusion with the second color (0...1)
+     */
     fusion(resolvable, proportion) {
         const color = new Color(resolvable);
         return this.map((c, i) => {
             return utils.map(proportion, 0, 1, c, color.rgb[i]);
         });
     }
+    /**
+     * return a new Color with mapped values [r, g, b]
+     */
     map(callback) {
         return new Color(this.rgb.map(callback));
     }
     toString(type = "hex") {
         switch (type) {
             case "hex":
-                return this.hex;
+                return Color.rgbToHexString(this.rgb);
             case "rgb":
                 return this.rgb.toString();
         }
     }
+    /**
+     * alias for hexNumber
+     */
+    toNumber() {
+        return Color.rgbToHexNumber(this.rgb);
+    }
+    toJSON() {
+        return this.rgb;
+    }
+    /**
+     * return false if the given resolvable is not a color
+     * @param resolvable - color to resolve
+     */
     static resolve(resolvable) {
         if (!resolvable)
             return false;
-        if (typeof resolvable === "string") {
+        if (typeof resolvable === "number" || typeof resolvable === "string") {
             if (this.isRgb(resolvable)) {
                 return Color.stringToRgb(resolvable);
             }
@@ -108,14 +152,30 @@ class Color {
         }
         return false;
     }
+    static rgbToHexCode(rgb) {
+        return ((1 << 24) + (rgb[0] << 16) + (rgb[1] << 8) + rgb[2])
+            .toString(16)
+            .slice(1);
+    }
+    static hexCodeToHex(hexCode) {
+        switch (this.hexMode) {
+            case "string":
+                return "#" + hexCode;
+            case "number":
+                return Number("0x" + hexCode);
+        }
+    }
     static rgbToHex(rgb) {
-        return ("#" +
-            ((1 << 24) + (rgb[0] << 16) + (rgb[1] << 8) + rgb[2])
-                .toString(16)
-                .slice(1));
+        return this.hexCodeToHex(this.rgbToHexCode(rgb));
+    }
+    static rgbToHexString(rgb) {
+        return "#" + this.rgbToHexCode(rgb);
+    }
+    static rgbToHexNumber(rgb) {
+        return Number("0x" + this.rgbToHexCode(rgb));
     }
     static hexToRgb(hex) {
-        const result = exports.hexRegex.exec(hex);
+        const result = exports.hexRegex.exec(String(hex));
         return result
             ? [
                 parseInt(result[1], 16),
@@ -131,11 +191,16 @@ class Color {
             : null;
     }
     static isHex(resolvable) {
-        return exports.hexRegex.test(resolvable);
+        return exports.hexRegex.test(String(resolvable));
     }
     static isRgb(resolvable) {
-        return exports.rgbRegex.test(resolvable);
+        return exports.rgbRegex.test(String(resolvable));
     }
+    /**
+     * return a gradiant from another mapped gradient
+     * @param resolvable - input gradient
+     * @param length - output gradient length
+     */
     static gradient(resolvable, length) {
         const colors = resolvable.map((r) => new Color(r));
         let array = [];
@@ -151,6 +216,9 @@ class Color {
         }
         return array;
     }
+    /**
+     * return new random Color
+     */
     static random() {
         return new Color([
             Math.floor(Math.random() * 255),
@@ -160,3 +228,9 @@ class Color {
     }
 }
 exports.default = Color;
+/**
+ * edit this flag to change default type of Hex values
+ * (string or number)
+ * default: number
+ */
+Color.hexMode = "string";

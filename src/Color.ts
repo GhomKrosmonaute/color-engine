@@ -2,14 +2,34 @@ import * as utils from "./utils"
 
 export type ColorResolvable = Rgb | Hex | Color | string
 export type Rgb = [number, number, number]
-export type Hex = string
+/**
+ * resolvable hex color
+ */
+export type Hex = string | number | HexCode
+/**
+ * hex color code (without prefix)
+ */
+export type HexCode = string
+/**
+ * resolvable color list
+ */
 export type GradientResolvable = ColorResolvable[]
+/**
+ * color list
+ */
 export type Gradient = Color[]
 
-export const hexRegex = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i
+export const hexRegex = /^(?:#|0x)?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i
 export const rgbRegex = /^\s*([1-9][0-9.]*)\s*,\s*([1-9][0-9.]*)\s*,\s*([1-9][0-9.]*)\s*$/
 
 export default class Color {
+  /**
+   * edit this flag to change default type of Hex values
+   * (string or number)
+   * default: number
+   */
+  static hexMode: "number" | "string" = "string"
+
   private r = 0
   private g = 0
   private b = 0
@@ -18,7 +38,7 @@ export default class Color {
   /**
    * Not a color ?
    */
-  public readonly isNaC: boolean
+  readonly isNaC: boolean
 
   get red(): number {
     return this.r
@@ -56,13 +76,45 @@ export default class Color {
     }
   }
 
+  /**
+   * get the RGB color as Array
+   */
   get rgb(): Rgb {
     return [this.r, this.g, this.b]
   }
-  get hex(): string {
+
+  /**
+   * get the hex color as {Color.hexMode}
+   */
+  get hex(): string | number {
     return Color.rgbToHex(this.rgb)
   }
 
+  /**
+   * get the hex color as String
+   */
+  get hexString(): string {
+    return Color.rgbToHexString(this.rgb)
+  }
+
+  /**
+   * get the hex color as Number
+   */
+  get hexNumber(): number {
+    return Color.rgbToHexNumber(this.rgb)
+  }
+
+  /**
+   * get hex code (without prefix) as String
+   */
+  get hexCode(): string {
+    return Color.rgbToHexCode(this.rgb)
+  }
+
+  /**
+   * @param resolvable - the fusion color
+   * @param proportion - the ratio of fusion with the second color (0...1)
+   */
   fusion(resolvable: ColorResolvable, proportion: number): Color {
     const color = new Color(resolvable)
     return this.map((c, i) => {
@@ -70,6 +122,9 @@ export default class Color {
     })
   }
 
+  /**
+   * return a new Color with mapped values [r, g, b]
+   */
   map(callback: (value: number, index: number) => number): Color {
     return new Color(this.rgb.map(callback) as Rgb)
   }
@@ -77,17 +132,32 @@ export default class Color {
   toString(type: "rgb" | "hex" = "hex"): string {
     switch (type) {
       case "hex":
-        return this.hex
+        return Color.rgbToHexString(this.rgb)
       case "rgb":
         return this.rgb.toString()
     }
   }
 
+  /**
+   * alias for hexNumber
+   */
+  toNumber(): number {
+    return Color.rgbToHexNumber(this.rgb)
+  }
+
+  toJSON(): Rgb {
+    return this.rgb
+  }
+
+  /**
+   * return false if the given resolvable is not a color
+   * @param resolvable - color to resolve
+   */
   static resolve(resolvable: ColorResolvable): Rgb | false {
     if (!resolvable) return false
-    if (typeof resolvable === "string") {
+    if (typeof resolvable === "number" || typeof resolvable === "string") {
       if (this.isRgb(resolvable)) {
-        return Color.stringToRgb(resolvable) as Rgb
+        return Color.stringToRgb(resolvable as string) as Rgb
       } else if (this.isHex(resolvable)) {
         return Color.hexToRgb(resolvable) as Rgb
       }
@@ -106,17 +176,35 @@ export default class Color {
     return false
   }
 
+  static rgbToHexCode(rgb: Rgb): HexCode {
+    return ((1 << 24) + (rgb[0] << 16) + (rgb[1] << 8) + rgb[2])
+      .toString(16)
+      .slice(1)
+  }
+
+  static hexCodeToHex(hexCode: HexCode): Hex {
+    switch (this.hexMode) {
+      case "string":
+        return "#" + hexCode
+      case "number":
+        return Number("0x" + hexCode)
+    }
+  }
+
   static rgbToHex(rgb: Rgb): Hex {
-    return (
-      "#" +
-      ((1 << 24) + (rgb[0] << 16) + (rgb[1] << 8) + rgb[2])
-        .toString(16)
-        .slice(1)
-    )
+    return this.hexCodeToHex(this.rgbToHexCode(rgb))
+  }
+
+  static rgbToHexString(rgb: Rgb): string {
+    return "#" + this.rgbToHexCode(rgb)
+  }
+
+  static rgbToHexNumber(rgb: Rgb): number {
+    return Number("0x" + this.rgbToHexCode(rgb))
   }
 
   static hexToRgb(hex: Hex): Rgb | null {
-    const result = hexRegex.exec(hex)
+    const result = hexRegex.exec(String(hex))
     return result
       ? [
           parseInt(result[1], 16),
@@ -133,14 +221,19 @@ export default class Color {
       : null
   }
 
-  static isHex(resolvable: string): boolean {
-    return hexRegex.test(resolvable)
+  static isHex(resolvable: Hex): boolean {
+    return hexRegex.test(String(resolvable))
   }
 
-  static isRgb(resolvable: string): boolean {
-    return rgbRegex.test(resolvable)
+  static isRgb(resolvable: any): boolean {
+    return rgbRegex.test(String(resolvable))
   }
 
+  /**
+   * return a gradiant from another mapped gradient
+   * @param resolvable - input gradient
+   * @param length - output gradient length
+   */
   static gradient(resolvable: GradientResolvable, length: number): Gradient {
     const colors: Gradient = resolvable.map((r) => new Color(r))
     let array = []
@@ -161,6 +254,9 @@ export default class Color {
     return array
   }
 
+  /**
+   * return new random Color
+   */
   static random(): Color {
     return new Color([
       Math.floor(Math.random() * 255),
