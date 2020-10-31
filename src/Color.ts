@@ -22,7 +22,7 @@ export type Gradient = Color[]
 export const hexRegex = /^(?:#|0x)?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i
 export const rgbRegex = /^\s*([1-9][0-9.]*)\s*,\s*([1-9][0-9.]*)\s*,\s*([1-9][0-9.]*)\s*$/
 
-export default class Color {
+export class Color {
   /**
    * edit this flag to change default type of Hex values
    * (string or number)

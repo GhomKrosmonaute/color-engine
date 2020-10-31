@@ -1,6 +1,6 @@
 {
   "name": "color-engine",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Creates color gradients from a few colors and converts RBG colors to HEX and vice versa.",
   "main": "dist/index.js",
   "types": "dist",

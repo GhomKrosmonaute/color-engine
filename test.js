@@ -1,4 +1,4 @@
-const Color = require("./dist/index")
+const { Color } = require("./dist/index")
 
 const blue = new Color("0000FF")
 const red = new Color([255, 0, 0])

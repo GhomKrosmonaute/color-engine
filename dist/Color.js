@@ -19,7 +19,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.rgbRegex = exports.hexRegex = void 0;
+exports.Color = exports.rgbRegex = exports.hexRegex = void 0;
 const utils = __importStar(require("./utils"));
 exports.hexRegex = /^(?:#|0x)?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i;
 exports.rgbRegex = /^\s*([1-9][0-9.]*)\s*,\s*([1-9][0-9.]*)\s*,\s*([1-9][0-9.]*)\s*$/;
@@ -227,7 +227,7 @@ class Color {
         ]);
     }
 }
-exports.default = Color;
+exports.Color = Color;
 /**
  * edit this flag to change default type of Hex values
  * (string or number)

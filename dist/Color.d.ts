@@ -18,7 +18,7 @@ export declare type GradientResolvable = ColorResolvable[];
 export declare type Gradient = Color[];
 export declare const hexRegex: RegExp;
 export declare const rgbRegex: RegExp;
-export default class Color {
+export declare class Color {
     /**
      * edit this flag to change default type of Hex values
      * (string or number)
