@@ -1,8 +1,6 @@
-name: publish on npm
-
 on:
-  release:
-    types: [created]
+  push:
+    branches: master
 
 jobs:
   test:
